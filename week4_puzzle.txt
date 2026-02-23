@@ -1,0 +1,87 @@
+import heapq
+import copy
+class PuzzleState:
+def __init__(self, board, parent=None, move="Start"):
+self.board = board
+self.parent = parent
+self.move = move
+self.g = 0 # Cost so far
+self.h = 0 # Heuristic cost
+def __lt__(self, other):
+return (self.g + self.h) < (other.g + other.h)
+def __eq__(self, other):
+return self.board == other.board
+def __hash__(self):
+return hash(tuple(map(tuple, self.board)))
+goal_state = [[1,2,3],
+[4,5,6],
+[7,8,0]]
+moves = [(0,1),(1,0),(0,-1),(-1,0)]
+move_names = ["Right","Down","Left","Up"]
+def manhattan_distance(state):
+distance = 0
+for i in range(3):
+for j in range(3):
+value = state.board[i][j]
+if value != 0:
+x, y = divmod(value - 1, 3)
+distance += abs(x - i) + abs(y - j)
+return distance
+def solve_puzzle(initial_state):
+open_list = []
+closed_set = set()
+initial_state.h = manhattan_distance(initial_state)
+heapq.heappush(open_list, initial_state)
+while open_list:
+current = heapq.heappop(open_list)
+if current.board == goal_state:
+return reconstruct_path(current)
+if current in closed_set:
+continue
+closed_set.add(current)
+# Find blank (0)
+for i in range(3):
+for j in range(3):
+if current.board[i][j] == 0:
+blank_i, blank_j = i, j
+break
+# Generate new states
+for move, name in zip(moves, move_names):
+new_i = blank_i + move[0]
+new_j = blank_j + move[1]
+if 0 <= new_i < 3 and 0 <= new_j < 3:
+new_board = copy.deepcopy(current.board)
+new_board[blank_i][blank_j], new_board[new_i][new_j] = \
+new_board[new_i][new_j], new_board[blank_i][blank_j]
+new_state = PuzzleState(new_board, current, name)
+new_state.g = current.g + 1
+new_state.h = manhattan_distance(new_state)
+if new_state not in closed_set:
+heapq.heappush(open_list, new_state)
+return None
+def reconstruct_path(state):
+path = []
+while state.parent is not None:
+path.append((state.move, state.board))
+state = state.parent
+path.reverse()
+return path
+def main():
+print("Enter initial furniture layout (3x3, use 0 for empty space):")
+initial_board = []
+for _ in range(3):
+row = list(map(int, input().split()))
+initial_board.append(row)
+initial_state = PuzzleState(initial_board)
+solution = solve_puzzle(initial_state)
+if solution:
+print("\nOptimal Rearrangement Steps:")
+for step, (move, board) in enumerate(solution, 1):
+print(f"\nStep {step}: Move blank {move}")
+for row in board:
+print(row)
+print("\nTotal Moves:", len(solution))
+else:
+print("No solution found.")
+if __name__ == "__main__":
+main()
