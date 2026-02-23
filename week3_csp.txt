@@ -1,0 +1,53 @@
+
+N = int(input("Enter number of regions: "))
+M = int(input("Enter number of colors: "))
+
+regions = []
+colors = []
+adjacency = []
+assigned_color = [-1] * N
+
+print("\nEnter region names:")
+for _ in range(N):
+    regions.append(input())
+
+print("\nEnter color names:")
+for _ in range(M):
+    colors.append(input())
+
+print("\nEnter adjacency matrix (0 or 1):")
+for i in range(N):
+    row = list(map(int, input().split()))
+    adjacency.append(row)
+
+
+def is_safe(region, c):
+    for i in range(N):
+        if adjacency[region][i] == 1 and assigned_color[i] == c:
+            return False
+    return True
+
+
+def solve_csp(region):
+    if region == N:
+        return True
+
+    for c in range(M):
+        if is_safe(region, c):
+            assigned_color[region] = c
+
+            if solve_csp(region + 1):
+                return True
+
+            # Backtrack
+            assigned_color[region] = -1
+
+    return False
+
+
+if solve_csp(0):
+    print("\nColor Mapping:\n")
+    for i in range(N):
+        print(regions[i], "=>", colors[assigned_color[i]])
+else:
+    print("No solution exists!")
