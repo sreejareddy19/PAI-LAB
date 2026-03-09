@@ -1,0 +1,50 @@
+import heapq
+from math import gcd
+def heuristic(jug1, jug2, target):
+return min(abs(jug1 - target), abs(jug2 - target))
+def is_solvable(cap1, cap2, target):
+if target > max(cap1, cap2):
+return False
+return target % gcd(cap1, cap2) == 0
+def water_jug_astar(cap1, cap2, target):
+if not is_solvable(cap1, cap2, target):
+print("No Solution Exists (Mathematically Impossible)")
+return
+visited = set()
+pq = []
+heapq.heappush(pq, (0, 0, 0, 0, []))
+while pq:
+f, g, jug1, jug2, path = heapq.heappop(pq)
+if (jug1, jug2) in visited:
+continue
+visited.add((jug1, jug2))
+path = path + [(jug1, jug2)]
+if jug1 == target or jug2 == target:
+print("\n Solution Found!\n")
+for step in path:
+print(step)
+print("\nTotal Steps:", len(path) - 1)
+return
+next_states = [
+(cap1, jug2), # Fill Jug1
+(jug1, cap2), # Fill Jug2
+(0, jug2), # Empty Jug1
+(jug1, 0), # Empty Jug2
+# Pour Jug1 → Jug2
+(jug1 - min(jug1, cap2 - jug2),
+jug2 + min(jug1, cap2 - jug2)),
+# Pour Jug2 → Jug1
+(jug1 + min(jug2, cap1 - jug1),
+jug2 - min(jug2, cap1 - jug1))
+]
+for next_jug1, next_jug2 in next_states:
+if (next_jug1, next_jug2) not in visited:
+g_new = g + 1
+h_new = heuristic(next_jug1, next_jug2, target)
+f_new = g_new + h_new
+heapq.heappush(pq, (f_new, g_new, next_jug1, next_jug2, path))
+print("No Solution Exists")
+cap1 = int(input("Enter capacity of Jug 1: "))
+cap2 = int(input("Enter capacity of Jug 2: "))
+target = int(input("Enter target amount: "))
+water_jug_astar(cap1, cap2, target)
