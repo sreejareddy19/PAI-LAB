@@ -1,0 +1,13 @@
+rain = input("Is it raining? (Yes/No): ")
+traffic = input("Is there traffic? (Yes/No): ")
+if rain == "Yes":
+    p_traffic_yes = 0.8
+else:
+    p_traffic_yes = 0.3
+if traffic == "Yes":
+    p_late = 0.9
+else:
+    p_late = 0.2
+print("\n--- Result ---")
+print("Probability of Traffic:", p_traffic_yes)
+print("Probability of Being Late:", p_late)
